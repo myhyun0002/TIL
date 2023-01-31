@@ -79,10 +79,10 @@ Click [naver](https://www.naver.com/)
 ___
 ## 7. Image
 ```
-![](2023-01-30-16-51-32.png)  
+![](../../assets/2023-01-30-16-51-32.png)  
 맥북 사용자인 경우 crl+command+shift+4 로 캡쳐하면 클립보드에 저장됨   그 상태에서 markdown으로 돌아와서 command+option+V 하면 됨
 ```
-![](2023-01-30-16-51-32.png)
+![](../../assets/2023-01-30-16-51-32.png)
 
 ___
 ## 8. Table
