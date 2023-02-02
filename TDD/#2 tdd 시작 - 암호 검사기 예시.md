@@ -12,8 +12,7 @@ ___
 <br/>
 <br/>
 
-## 0. test code를 작성할 클래스 생성
-___
+# test code를 작성할 클래스 생성
   - 생각의 흐름
   > 1. 암호 검사기를 만들거니까 암호는 password 강도 검사니까 Strength Meter이라고 하자 
   >> - 그럼 클래스 이름을 PasswordStrengthMeter 이라고 하자.
@@ -173,3 +172,410 @@ ___
 <br/>
 <br/>
 
+# 두번째 테스트 : 길이만 8글자 미만이고 나머지 조건 충족하는 경우
+
+## 1. 두번째 test code 작성
+___
+> - 생각의 흐름   
+>> - 모든 조건 만족이지 meetsAllcriteria로 하고 모두 만족하면 암호를 강함으로 하기로 했으니 뒤에 Then Strong을 붙이면 좋겠네 
+>> - meetsAllCriteria_Then_Strong 으로 하자.
+
+
+```java
+public class PasswordStrengthMeterTest{
+  @Test
+  void meetsAllCriteria_Then_Strong(){
+    // 첫번재 테스트 수행
+  }
+
+  @Test
+  void meetsOtherCriteria_except_for_Length_Then_Normal(){
+    PasswordStrengthMeter meter = new PasswordStrengthMeter();
+    PasswordStrength result = meter.meter("ab12!@A");
+    assertEquals(PasswordStrength.NORMAL,result);
+  }
+}
+```
+<br/>
+<br/>
+
+## 2. enum 클래스 수정
+___
+```java
+public enum PasswordStrength{
+  NORMAL,STRONG
+}
+```
+- 두개만 만족하니 강도는 NORMAL이다.
+- test code가 에러 안날 정도만 작성
+___
+<br/>
+<br/>
+
+## 3. meter 메서드 수정
+___
+- 새로 추가한 테스트만 고려했을 때 meter 메서드
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    return PasswordStrength.NORMAL;
+  }
+}
+```
+위와 같이 했을 경우 첫번째 테스트를 통과하지 못한다.    
+첫번째 두번째 테스트 모두 통과하게끔 코드를 작성해야 한다.
+
+- 두 테스트를 모두 고려했을 때
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+    return PasswordStrength.STRONG;
+  }
+}
+```
+이번 테스트는 3개 조건 중 길이가 8개 미만인 조건만 충족하지 않으므로    
+길이가 8 미만이면 NORMAL로 하고 그게 아니면 STRONG으로 하면   
+첫번째 두번째 테스트 모두 만족한다.
+___
+<br/>
+<br/>
+
+# 세 번째 테스트 : 숫자를 포함하지 않고 나머지 모두 충족
+## 1. test code 작성
+___
+- test code는 두 번째 테스트랑 똑같지만 암호 예시가 달라진다.
+- 모든 조건은 만족하고 숫자만 포함되지 않는 예시로 한다.
+```java
+public class PasswordStrengthMeterTest{
+  @Test
+  void meetsAllCriteria_Then_Strong(){
+    // 첫번재 테스트 수행
+  }
+
+  @Test
+  void meetsOtherCriteria_except_for_Length_Then_Normal(){
+    PasswordStrengthMeter meter = new PasswordStrengthMeter();
+    PasswordStrength result = meter.meter("ab12!@A");
+    assertEquals(PasswordStrength.NORMAL,result);
+  }
+
+  @Test
+  meetsOtherCriteria_except_for_number_Then_Normal(){
+    PasswordStrengthMeter meter = new PasswordStrengthMeter();
+    PasswordStrength result = meter.meter("ab!@ABqwer");
+    assertEquals(PasswordStrength.NORMAL,result);
+  }
+}
+```
+___
+<br/>
+<br/>
+
+## 2. meter 메서드 수정
+___
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 두번째 테스트 조건
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    boolean containsNum = false;
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+        containsNum = true;
+        break;
+      }
+    }
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    return PasswordStrength.STRONG;
+  }
+}
+```
+- 위와 같이 수정하면 1,2,3번째 테스트 모두 통과한다.    
+___
+<br/>
+<br/>
+
+## 3. PasswordStrengthMeter 코드 정리
+___
+위 코드가 너무 복잡하므로 리펙토링 해보자
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 두번째 테스트 조건
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    boolean containsNum = meetsContainingNumberCriteria(s);
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+___
+<br/>
+<br/>
+
+## 4. test code 정리
+___
+- test에 중복되는 코드가 있다.
+```java
+PasswordStrengthMeter meter = new PasswordStrengthMeter();
+PasswordStrength result = meter.meter(암호);
+assertEquals(PasswordStrength.값,result);
+```
+- 암호, 값 자리 빼고는 반복이 되므로 따로 메서드를 만들어서 리펙토링하자.
+```java
+public class PasswordStrengthMeterTest{
+  private PasswordStrengthMeter meter = new PasswordStrengthMeter();
+
+  private void assertStrength(String password, PasswordStrength expStr){
+    PasswordStrength result = meter.meter(password);
+    assertEquals(result, expStr);
+  }
+
+  @Test
+  void meetsAllCriteria_Then_Strong(){
+    assertStrength("ab12!@ab",PasswordStrength.STRONG);
+
+    assertStrength("abc1!!@ab",PasswordStrength.STRONG);
+  }
+
+  // 나머지 코드도 위와 같이 바꾼다.
+}
+```
+___
+<br/>
+<br/>
+
+# 네 번째 테스트 : 값이 없는 경우
+- 값이 없을 수도 있다. (에외 상황)
+- 값이 빈 문자열일 수도 있다. (예외 상황)
+- 예외 상황도 항상 고려해야 된다.
+
+<br/>
+<br/>
+
+두 가지 방법으로 예외를 처리할 수 있다.
+- IllegalArgumentException 처리
+- PasswordStrength.INVALIDE로 자체 처리
+
+<br/>
+
+PasswordStrength.INVALIDE로 처리 선택     
+___
+<br/>
+<br/>
+
+## 1. test code 작성
+```java
+public class PasswordStrengthMeterTest{
+  private PasswordStrengthMeter meter = new PasswordStrengthMeter();
+
+  private void assertStrength(String password, PasswordStrength expStr){
+    PasswordStrength result = meter.meter(password);
+    assertEquals(result, expStr);
+  }
+  
+  @Test
+  void nullInput_the_Invalid(){
+    assertStrength(null,PasswordStrength.INVALID);
+  }
+
+  @Test
+  void emptyInput_Then_Invalid(){
+    assertStrength("",PasswordStrength.INVALID);
+  }
+}
+```
+- PasswordStrength에 INVALID 값을 추가하지 않아서 오류가 난다.
+___
+<br/>
+<br/>
+
+## 2. PasswordStrength 수정
+```java
+public enum PasswordStrength{
+  STRONG,NORMAL,INVALID
+}
+```
+- 위와 같이 하면 에러가 안난다.
+___
+<br/>
+<br/>
+
+## 3. 빈 값일 때와 null 일 때 모두 처리하도록 meter 수정
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    // 두번째 테스트 조건
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    boolean containsNum = meetsContainingNumberCriteria(s);
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false; 
+  }
+}
+```
+___
+<br/>
+<br/>
+
+# 다섯 번째 테스트 : 대문자를 포함하지 않고 나머지 조건을 충족하는 경우
+## 1. test code 작성
+
+___
+```java
+public class PasswordStrengthMeterTest{
+  private PasswordStrengthMeter meter = new PasswordStrengthMeter();
+
+  private void assertStrength(String password, PasswordStrength expStr){
+    PasswordStrength result = meter.meter(password);
+    assertEquals(result, expStr);
+  }
+  
+  @Test
+  void meetsOtherCriteria_except_for_Uppercase_then_Normal(){
+    assertStrength("ab12!@df",PasswordStrength.NORMAL);
+  }
+}
+```
+- 대문자가 포함되지 않은 암호 예시 사용
+- 위의 test code는 에러가 난다.
+- 아직 meter 메서드를 수정하지 않았기 때문에
+___
+<br/>
+<br/>
+
+## 2. meter 메서드 수정
+___
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    // 두번째 테스트 조건
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    boolean containsNum = meetsContainingNumberCriteria(s);
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 다섯번째 조건
+    boolean containsUpp = false;
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+        containsUpp = true;
+        break;
+      }
+    }
+    if(!containsUpp) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+___
+<br/>
+<br/>
+
+## 2-1. meter 메서드 리펙토링
+___
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    // 두번째 테스트 조건
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    boolean containsNum = meetsContainingNumberCriteria(s);
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 다섯번째 조건
+    boolean containsUpp = meetsContainingUpperCriteria(s)
+    if(!containsUpp) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
