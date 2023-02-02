@@ -579,3 +579,562 @@ public class PasswordStrengthMeter{
   }
 }
 ```
+___
+<br/>
+<br/>
+
+# 여섯 번째 테스트 : 길이가 8글자 이상 조건만 중촉
+- 이제는 한가지 조건만 충족하는 경우들만 테스트 하면 된다.
+- 이 때 강도는 WEAK이다.
+<br/>
+<br/>
+
+## 1. test code 작성
+___
+```java
+@Test
+void meetsOnlyLengthCriteria_Then_Weak(){
+  assertStrength("abdefghi",PasswordStrength.WEAK);
+}
+```
+- 8글자만 충족하고 대문자도 없고 숫자도 없는 예시를 선택
+___
+<br/>
+<br/>
+
+## 2. PasswordStrength 수정
+___
+- 강도가 WEAK 이므로 enum 클래스에 WEAK 추가해준다.
+```java
+public enum PasswordStrength{
+  INVALID,WEAK,NORMAL,STRONG
+}
+```
+___
+<br/>
+<br/>
+
+## 3. test code 실행
+___
+- test code를 실행시키면 우리가 원했던 WEAK가 아닌 NORMAL이 떠서 에러가 난다.
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    // 두번째 테스트 조건
+    if(s.length() < 8){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    boolean containsNum = meetsContainingNumberCriteria(s);
+    if(!containsNum) return PasswordStrength.NORMAL;
+```
+- 네번째 두번째는 넘어가는데
+- 세번째 테스트 조건에서 숫자가 없으니 바로 NORMAL을 return 하는 것이다.
+
+### 해결법
+- 8 이상일 때 나머지 두 조건이 충족 안할 때는 WEAK을 return하도록 해야 한다.
+___
+<br/>
+<br/>
+
+## 4. meter 수정
+___
+지금부터 meter 메서드를 두 구역으로 나눌 것이다.      
+1. boolean 타입으로 해당 세가지 조건의 충족 여부 확인
+2. 조건에 따른 강도 (WEAK,NORMAL,STRONG) 판단 후 reuturn
+
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+    
+    // 길이가 8 이상이면 true
+    boolean lengthEnough = s.length() >= 8;
+    // 대문자 포함이면 true
+    boolean containsUpp = meetsContainingUpperCriteria(s)
+    // 숫자 포함이면 true
+    boolean containsNum = meetsContainingNumberCriteria(s);
+
+//==========================================================
+
+    // 여섯 번째 테스트 조건
+    // 길이가 8 이상이고 나머지 조건은 충족 못할 때
+    if(lengthEnough && !containsUpp && !containsNum){
+      return PasswordStrength.WEAK;
+    }
+
+    // 두번째 테스트 조건
+    // 8자 이상이 안될 때 (나머지 두 조건은 충족)
+    if(!lengthEnough){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    // 숫자가 포함되지 않았을 때 (나머지 두 조건은 충족)
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 다섯번째 조건
+    // 대문자가 포함되지 않았을 때 (나머지 두 조건은 충족)
+    if(!containsUpp) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    // 3가지 모두 충족이 되었을 때
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+- 선을 기준으로 위에는 조건 충족 여부
+- 밑에는 조건에 따른 return 값 결정
+___
+<br/>
+<br/>
+
+# 숫자 포함 조건만 충족하는 경우
+## 1. test code 작성
+___
+```java
+@Test
+void meetsOnlyNumCriteria_Then_Weak(){
+  assertStrength("12345",PasswordStrength.WEAK);
+}
+```
+- 숫자만 있는 암호 예시 사용
+- 대문자와 8자이상 조건 충족 x
+___
+<br/>
+<br/>
+
+## 2. meter 수정
+___
+```java
+// 일곱 번째 테스트 조건
+// 숫자만 포함되있고 나머지 두 조건은 충족 못할 때
+if(!lengthEnough && !containsUpp && containsNum){
+  return PasswordStrength.WEAK;
+}
+```
+- 위의 코드 추가하면 된다.
+<br/>
+<br/>
+
+
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+    
+    // 길이가 8 이상이면 true
+    boolean lengthEnough = s.length() >= 8;
+    // 대문자 포함이면 true
+    boolean containsUpp = meetsContainingUpperCriteria(s)
+    // 숫자 포함이면 true
+    boolean containsNum = meetsContainingNumberCriteria(s);
+
+//==========================================================
+
+    // 여섯 번째 테스트 조건
+    // 길이가 8 이상이고 나머지 조건은 충족 못할 때
+    if(lengthEnough && !containsUpp && !containsNum){
+      return PasswordStrength.WEAK;
+    }
+
+    // 일곱 번째 테스트 조건
+    // 숫자만 포함되있고 나머지 두 조건은 충족 못할 때
+    if(!lengthEnough && !containsUpp && containsNum){
+      return PasswordStrength.WEAK;
+    }
+
+    // 두번째 테스트 조건
+    // 8자 이상이 안될 때 (나머지 두 조건은 충족)
+    if(!lengthEnough){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    // 숫자가 포함되지 않았을 때 (나머지 두 조건은 충족)
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 다섯번째 조건
+    // 대문자가 포함되지 않았을 때 (나머지 두 조건은 충족)
+    if(!containsUpp) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    // 3가지 모두 충족이 되었을 때
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+___
+<br/>
+<br/>
+
+# 여덟 번째 테스트 : 대문자 포함 조건만 충족
+## 1. test code 작성
+___
+```java
+@Test
+void meetsOnlyUpperCriteria_Then_Weak(){
+  assertStrength("ABZEF",PasswordStrength.WEAK);
+}
+```
+___
+<br/>
+<br/>
+
+## 2. meter 메서드 수정
+___
+```java
+// 여덟 번째 테스트 조건
+// 대문자만 포함되있고 나머지 두 조건은 충족 못할 때
+if(!lengthEnough && containsUpp && !containsNum){
+  return PasswordStrength.WEAK;
+}
+```
+- 위의 코드 추가하면 된다.
+<br/>
+<br/>
+
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+    
+    // 길이가 8 이상이면 true
+    boolean lengthEnough = s.length() >= 8;
+    // 대문자 포함이면 true
+    boolean containsUpp = meetsContainingUpperCriteria(s)
+    // 숫자 포함이면 true
+    boolean containsNum = meetsContainingNumberCriteria(s);
+
+//==========================================================
+
+    // 여섯 번째 테스트 조건
+    // 길이가 8 이상이고 나머지 조건은 충족 못할 때
+    if(lengthEnough && !containsUpp && !containsNum){
+      return PasswordStrength.WEAK;
+    }
+
+    // 일곱 번째 테스트 조건
+    // 숫자만 포함되있고 나머지 두 조건은 충족 못할 때
+    if(!lengthEnough && !containsUpp && containsNum){
+      return PasswordStrength.WEAK;
+    }
+
+    // 여덟 번째 테스트 조건
+    // 대문자만 포함되있고 나머지 두 조건은 충족 못할 때
+    if(!lengthEnough && containsUpp && !containsNum){
+        return PasswordStrength.WEAK;
+    }
+
+    // 두번째 테스트 조건
+    // 8자 이상이 안될 때 (나머지 두 조건은 충족)
+    if(!lengthEnough){
+      return PasswordStrength.NORMAL;
+    }
+
+    // 세번째 테스트 조건
+    // 숫자가 포함되지 않았을 때 (나머지 두 조건은 충족)
+    if(!containsNum) return PasswordStrength.NORMAL;
+
+    // 다섯번째 조건
+    // 대문자가 포함되지 않았을 때 (나머지 두 조건은 충족)
+    if(!containsUpp) return PasswordStrength.NORMAL;
+
+    // 첫번째 테스트 조건
+    // 3가지 모두 충족이 되었을 때
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+___
+<br/>
+<br/>
+
+## 4. meter 코드 정리 
+___
+뭔가 조금 복잡한 느낌이 있다. 좀 더 리펙토링 할 순 없을까?
+
+- 조건 개수를 사용해보는 건 어떨까?
+  - 만족하는 조건이 3개면 STRONG
+  - 만족하는 조건이 2개면 NORMAL
+  - 만족하는 조건이 1개면 WEAK
+<br/>
+<br/>
+<br/>
+
+### 정리 결과 코드
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    // 만족하는 조건 개수 count
+    int metCounts = 0;
+    if(s.length() >= 8) metCounts++;
+    if(meetsContainingNumberCriteria(s)) metCounts++;
+    if(meetsContainingUpperCriteria(s)) metCounts++;
+
+    // 만족하는 조건 개수에 따라 강도 return
+    if(metCounts == 1) return PasswordStrength.WEAK;
+    if(metCounts == 2) return PasswordStrength.NORMAL;
+
+    return PasswordStrength.STRONG;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+- 코드가 정말 간단해졌고
+- 조건 개수에 따라 강도를 나누니 가시성도 좋아졌다.
+___
+<br/>
+<br/>
+
+# 아홉 번째 테스트 : 아무 조건도 충족 안 할 때
+## 1. test code 작성
+```java
+public class PasswordStrengthMeterTest{
+  // ... 생략
+  @Test
+  void meetsNoCriteria_Then_Weak(){
+    assertStrength("abc",PasswordStrength.WEAK);
+  }
+}
+```
+- 대문자 x
+- 길이 8 이상 x
+- 숫자 x
+- 모두 조건이 만족하지 않는 예시다.
+___
+<br/>
+<br/>
+
+## 2. meter 메서드 수정
+___
+### 해결법
+- 조건이 1개 이하면 WEAK return 
+- 만족하는 조건 == 0 이면 WEAK return
+
+첫번째 껄로 수정한다면
+```java
+// 만족하는 조건 개수에 따라 강도 return
+if(metCounts <= 1) return PasswordStrength.WEAK;
+```
+- 원래는 == 이였는데 이하로 수정하면 된다.
+
+___
+<br/>
+<br/>
+
+# 최종 코드 정리
+```java
+// 만족하는 조건 개수 count
+    int metCounts = 0;
+    if(s.length() >= 8) metCounts++;
+    if(meetsContainingNumberCriteria(s)) metCounts++;
+    if(meetsContainingUpperCriteria(s)) metCounts++;
+```
+
+- 위 부분을 정리하면 좀 더 깔끔한 코드가 될 것 같다.
+- 위 코드를 따로 메서드로 만들어서 main 코드에서는 호출만 하도록 만들자.
+
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    int metCounts = getMetCritieriaCounts(s);
+
+    // 만족하는 조건 개수에 따라 강도 return
+    if(metCounts <= 1) return PasswordStrength.WEAK;
+    if(metCounts == 2) return PasswordStrength.NORMAL;
+
+    return PasswordStrength.STRONG;
+  }
+
+  private int getMetCritieriaCounts(String s){
+    // 만족하는 조건 개수 count
+    int metCounts = 0;
+    if(s.length() >= 8) metCounts++;
+    if(meetsContainingNumberCriteria(s)) metCounts++;
+    if(meetsContainingUpperCriteria(s)) metCounts++;
+    return metCounts;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+- 위 코드처럼 정리하면 처음 개발자가 봤을 때 
+  - 암호가 null이거나 빈 문자열이면 암호 강도는 INVALID 이구나
+  - 충족하는 규칙 개수를 구하네
+  - 충족하는 규칙 개수가 1 이하면 암호 강도가 WEAK이다.
+  - 충족하는 규칙 개수가 2이면 암호 강도가 NORMAL이다.
+  - 이 외에는 암호 강도가 STRONG이다.   
+
+한번에 알 수 있다.
+___
+<br/>
+<br/>
+
+# 최종 코드
+### PasswordStrengthMeter 클래스
+```java
+public class PasswordStrengthMeter{
+  public PasswordStrength meter(String s){
+    // 네번째 테스트 조건
+    if(s == null || s.Empty()) return PasswordStrength.INVALID;
+
+    int metCounts = getMetCritieriaCounts(s);
+
+    // 만족하는 조건 개수에 따라 강도 return
+    if(metCounts <= 1) return PasswordStrength.WEAK;
+    if(metCounts == 2) return PasswordStrength.NORMAL;
+
+    return PasswordStrength.STRONG;
+  }
+
+  private int getMetCritieriaCounts(String s){
+    // 만족하는 조건 개수 count
+    int metCounts = 0;
+    if(s.length() >= 8) metCounts++;
+    if(meetsContainingNumberCriteria(s)) metCounts++;
+    if(meetsContainingUpperCriteria(s)) metCounts++;
+    return metCounts;
+  }
+
+  // 숫자 포함 확인 코드 분리
+  private boolean meetsContainingNumberCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(ch >= '0' & ch <= '9'){
+      return true;
+      }
+    }
+  return false;
+  }
+
+  // 대문자 포함 확인 코드 분리
+  private boolean meetsContainingUpperCriteria(String s){
+    for(char ch : s.toCharArray()){
+      if(Character.isUpper(ch)){
+      return true;
+      }
+    }
+  return false;
+  }
+}
+```
+### PasswordStrength enum 클래스
+```java
+public enum PasswordStrength{
+  INVALID,WEAK,NORMAL,STRONG
+}
+```
+<br/>
+<br/>
+
+# 테스트에서 main으로 코드 이동하면 구현 끝
