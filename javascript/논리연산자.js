@@ -18,3 +18,15 @@ if(name === 'Tom' && age > 19){
   console.log("돌아가");
 }
 
+
+// Or
+
+function sayHello(name){
+  let newName = name || 'friend';     // 매개변수가 없으면 friend가 출력됨
+  let msg = `Hello ${newName}`;
+  console.log(msg);
+}
+
+sayHello();             
+sayHello('Jane');
+
