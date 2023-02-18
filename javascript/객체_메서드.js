@@ -18,6 +18,13 @@ const superman = {
   // 객체 안에 있는 변수를 쓰고 싶다면 this 사용
   sayHello(){
     console.log(`Hello ${this.name}`);
+  },
+
+  // 객체를 선언하는 방법 중 아래와 같이 화살표 함수로 선언할 수도 있는데
+  // 화살표 함수로 선언할 경우 이 안에 들어가 있는 this는 객체를 가리키는게 아닌 window를 가리킨다.
+  // 따라서 객체를 선언할 때는 화살표 함수를 가급적 사용하지 않는 것이 좋다.
+  sayThis : () => {
+    console.log(this);
   }
 
 }
