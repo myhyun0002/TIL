@@ -87,3 +87,5 @@ git stash pop
 ```
 git stash show -p stash@{0}
 ```
+
+이거 수정
