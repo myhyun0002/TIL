@@ -36,3 +36,32 @@
     transform: rotate(360deg);
   }
 }
+
+.profile{
+  position: relative;;
+  width: 300px;
+  text-align: center;
+  padding: 1rem;
+  background-color: #ebebeb;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  box-shadow: 10px 10px 205px 0px rgba(0,0,0,0.75);
+  -webkit-box-shadow: 10px 10px 205px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 10px 10px 205px 0px rgba(0,0,0,0.75);
+
+}
+
+.photo{
+  width: 200px;
+  height: 200px;
+  border-radius: 100%;
+}
+
+.new{
+  position: absolute;
+  left: 70%;
+  top: 10%;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  background-color: #61dafb;
+}
