@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import Profile from './components/Profile';
+import Avatar from './components/Avatar';
 
 // 함수 이름은 대문자로 시작할 것
 function AppProfile() {
@@ -13,6 +14,12 @@ function AppProfile() {
       component 재사용  
     */
     }
+
+      <Avatar
+      image='https://images.unsplash.com/photo-1677612968800-4d9f1104d251?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
+      isNew={true}
+      />
+
       <Profile 
       image = 'https://images.unsplash.com/photo-1677612968800-4d9f1104d251?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
       name ='james'
@@ -31,7 +38,7 @@ function AppProfile() {
       title = '풀스택 개발자'
       isNew = {true}
       />
-      
+
     </>
   );
 }
