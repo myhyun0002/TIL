@@ -9,6 +9,8 @@
   2 3 4
 
   (4 * 3 * 2) / (3*2*1) = 4
+
+  순서 없이 뽑는다고 했을 때는 combination 생각해야 한다.
 */
 
 #include <iostream>
