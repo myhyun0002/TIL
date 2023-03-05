@@ -22,6 +22,7 @@ void print(vector<int> const  &b){
   cout << endl;
 }
 
+// 재귀로 짠 combination
 void combination(int start, vector<int> b, int n, int k){
   if(b.size() == k){
     //print(b);
@@ -37,6 +38,19 @@ void combination(int start, vector<int> b, int n, int k){
     b.pop_back();
   }
   return;
+}
+
+// 중첩 for문으로 짠 combination
+// 1부터 n까지 
+// n개중 3개를 뽑는 경우
+void combination_for(int n){
+  for(int i = 0 ; i < n ; i++){
+    for(int j = 0 ; j < i ;  j++){
+      for(int k = 0 ; k < j ; k++){
+        cout << i << " " << j << " " << k << "\n";      
+      }
+    }
+  }
 }
 
 int main(){
