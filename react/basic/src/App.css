@@ -95,6 +95,10 @@
   margin: 0;
 }
 
+.totalCountNumber{
+  display: inline;
+}
+
 .button{
   font-size: 2rem;
   padding: 0.2rem,1rem;
@@ -106,5 +110,16 @@
     rgba(215,127,12,1) 0%,
     rgba(253,220,29,1) 100%
   )
-
 }
+
+.totalCount{
+  font-size: 1.5rem;
+  display: flex;
+  width: 300px;
+  align-items: center;
+  justify-content: center;
+  background-color: yellow;
+  margin: auto;
+  margin-top: 2rem;
+}
+

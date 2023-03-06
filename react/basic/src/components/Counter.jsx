@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Counter() {
+export default function Counter({total,onClick}) {
   /*
     react에서 외부 변수를 사용하고 싶으면 useState를 써야 한다
     number : 변수
@@ -8,11 +8,15 @@ export default function Counter() {
 
     setNumber가 호출될 때마다 useState가 갱신이 되어서 number도 같이 갱신
   */
-  const [number,setNumber] = useState(0);
+  const [count,setCount] = useState(0);
 
   return (
     <div className='counter'>
-      <p className='number'>{number}</p>
+      <div>
+        <span className='number'>{count}</span>
+        <span>/{total}</span>
+      </div>
+      
       {/* 
         밑에 onClick 같은 함수를 call back 함수라고 한다
         call back 함수 : 파라미터에 함수가 들어있는 함수를 말함
@@ -29,11 +33,10 @@ export default function Counter() {
         그게 setNumber((prev)=>prev+1) 하는 것이다 그러면 prev에 바로 전 상태가 저장이 되었다가
         사용하게 된다
       */}
+
       <button className='button' onClick={()=>{
-        setNumber(number+1);
-        setNumber((prev) => prev + 1);
-        setNumber((prev) => prev + 1);
-        setNumber((prev) => prev + 1);
+        setCount((prev) => prev+1);
+        onClick();
       }}>Add +</button>
     </div>
   );
