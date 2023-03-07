@@ -51,6 +51,12 @@ export default function Products() {
       <input id='checkbox' type = "checkbox" value = {checked} onChange={handleChange} />
       <label htmlFor='checkbox'>Show Only 🔥 Sale</label>
       <ul>
+
+        {/* 
+          map을 이용해서 자식 요소를 만드는 경우에는 
+          고유한 key값을 넣어줘야 한다
+          key = {product.id}처럼 말이다.
+        */}
         {products.map((product)=>(
           <li key={product.id}>
             <article>
