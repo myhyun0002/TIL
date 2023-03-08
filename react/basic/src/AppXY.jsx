@@ -8,12 +8,22 @@ export default function AppXY() {
     setXY({x: e.clientX, y: e.clientY});
   }
 
+  // 만약 y축은 가만히 있고 x축만 움직이게 하고 싶다면 아래와 같이 한다..
+  const handleMouseMove_x = (e) => {
+    setXY(prev => ({x : e.clientX, y: prev.y}));
+  }
+
+  // 만약 z축 까지 있는 상태에서 x만 변화하고 싶게 하고 싶다면
+  const handleMouseMove_x_yz = (e) => {
+    setXY((prev) => ({...prev, x : e.clientX}));
+  }
+
   let point_style = {
     transform: `translate(${xy.x}px, ${xy.y}px)`
   }
 
   return (
-    <div className='container' onMouseMove={(e) => {handleMouseMove(e)}}>
+    <div className='container' onMouseMove={(e) => {handleMouseMove_x_yz(e)}}>
       <div className="pointer" style = {point_style}/>
     </div>
   );
