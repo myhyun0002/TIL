@@ -5,6 +5,9 @@ using namespace std;
 /*
   stack
   
+  삽입 : stack.push()
+  맨 위 값 반환 : stack.top()
+  삭제 : stack.pop()
 
 */
 
