@@ -17,8 +17,6 @@ int main(){
     cin >> input;
 
     for(char c : input){
-      // printf("지금 string은 %s이고 현재 문자는 %c입니다.\n",input.c_str(),c);
-
       if(s.empty()){
         s.push(c);
       }else{
